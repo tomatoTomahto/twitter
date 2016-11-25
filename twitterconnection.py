@@ -78,3 +78,4 @@ class TwitterConnection():
                 outfile.write('\n')
             outfile.flush()
             outfile.close()
+        self._tweets_to_insert = []
