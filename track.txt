@@ -1,0 +1,28 @@
+@walmart
+@costco
+@kroger
+@home depot
+@walgreens
+@target
+@amazon
+@cvs_extra
+@lowes
+@best buy
+@safeway
+@sears
+@publix
+@tjmaxx
+@macys
+@riteaid
+@apple
+@kohls
+@dollargeneral
+@gap
+@meijer
+@wholefoods
+@nordstrom
+@toysrus
+@jcpenny
+@bedbathbeyond
+@staples
+@ross_stores
