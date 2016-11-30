@@ -1,13 +1,13 @@
 @walmart
 @costco
 @kroger
-@home depot
+@homedepot
 @walgreens
 @target
 @amazon
 @cvs_extra
 @lowes
-@best buy
+@bestbuy
 @safeway
 @sears
 @publix
