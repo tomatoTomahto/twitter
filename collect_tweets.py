@@ -12,30 +12,16 @@ if not os.path.isfile('track.txt'):
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-if'twitter' not in config:
-    print('Error: missing twitter config')
-    exit()
-
-tw_access_token = config['twitter']['access_token']
-tw_access_token_secret = config['twitter']['access_token_secret']
-tw_consumer_key = config['twitter']['consumer_key']
-tw_consumer_secret = config['twitter']['consumer_secret']
-
-# Retrieve terms to track
-track_file = open('track.txt', 'r')
-track_terms = [line.rstrip('\n') for line in track_file]
-print('Tracking: ' + str(track_terms))
 
 # Connect to twitter and track stocks
-twitter_con = twitter.TwitterConnection(access_token=tw_access_token, access_token_secret=tw_access_token_secret,
-                                        consumer_key=tw_consumer_key, consumer_secret=tw_consumer_secret)
+twitter_con = twitter.TwitterConnection(config)
 
 while True:
     print('Listening for tweets...')
-    twitter_con.track(track_terms=track_terms)
+    twitter_con.track()
 
     # Keep connection open for 5 minutes
     time.sleep(600)
 
     # Write all tweets to disk
-    twitter_con.write_new_tweets(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
+    twitter_con.printStats()
