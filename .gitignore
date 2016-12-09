@@ -4,3 +4,5 @@ config.ini
 *.log
 metastore_db
 librdkafka
+.idea
+.ipynb_checkpoints
