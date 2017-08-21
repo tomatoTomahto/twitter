@@ -1,7 +1,7 @@
 import tweepy
 from tweepy.streaming import StreamListener
 import time, datetime, json, traceback
-import kafkaconnection as kafka
+import kafkaconnection as kafka, filewriter
 
 class TwitterConnection():
     class MyListener(StreamListener):
@@ -41,12 +41,9 @@ class TwitterConnection():
             return True
 
     def __init__(self, config):
-        if 'twitter' not in config:
-            raise Exception('Error: missing [twitter] config')
-        elif 'track' not in config:
-            raise Exception('Error: missing [track] config')
-        elif 'kafka' not in config:
-            raise Exception('Error: missing [kafka] config')
+        for configEntry in ['twitter','track','output']:
+          if configEntry not in config:
+            raise Exception('Error: missing %s config' % configEntry)
 
         # Twitter credentials
         self._access_token = config['twitter']['access_token']
@@ -57,13 +54,17 @@ class TwitterConnection():
         # Retrieve terms to track
         track_file = open(config['track']['file'], 'r')
         self._track_terms = [line.rstrip('\n') for line in track_file]
+        self._start_index = int(config['track']['start'])
 
         # Store tweets temporarily and dump them to file at an interval
         self._tweets_to_insert = []
 
-        # Initialize Kafka
-        self._kafka = kafka.KafkaConnection(brokers=config['kafka']['brokers'],
-                                            topic=config['kafka']['topic'])
+        # Initialize Kafka or File Writer
+        if config['output']['type'] == 'kafka':
+          self._writer = kafka.KafkaConnection(brokers=config['output']['kafka_brokers'],
+                                              topic=config['output']['kafka_topic'])
+        else:
+          self._writer = filewriter.FileWriter(filename=config['output']['filename'])
 
         #This handles Twitter authetification and the connection to Twitter
         self._auth = tweepy.OAuthHandler(self._consumer_key, self._consumer_secret)
@@ -72,6 +73,8 @@ class TwitterConnection():
 
         # Initialize twitter statistics
         self._twitter_stats = {'tweets':0}
+        
+        self._twitter_streams = []
 
     # connect (PRIVATE) - connect to twitter via tweepy API using credentials
     def _connect(self):
@@ -80,16 +83,31 @@ class TwitterConnection():
 
     # track - create a twitter listening to track a given set of search terms
     def track(self):
-        self._twitter_stream = tweepy.Stream(self._auth, self.MyListener(writer=self._kafka))
-        self._twitter_stream.filter(track=self._track_terms, async=True)
+        track_terms = self._track_terms
+        connections = -(-len(track_terms)/400)
+        for connection in range(self._start_index,self._start_index+2):
+          print('Connection %d' % (connection+1))
+          terms = track_terms[:400]
+          twitter_stream = tweepy.Stream(self._auth, self.MyListener(writer=self._writer))
+          twitter_stream.filter(track=terms, async=True)
+          self._twitter_streams.append(twitter_stream)
+          track_terms = track_terms[400:]
 
     # disconnect - disconnect twitter stream
     def _disconnect(self):
-        self._twitter_stream.disconnect()
+        for twitter_stream in self._twitter_streams:
+          twitter_stream.disconnect()
 
-    def printStats(self):
-        dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        print(dt + ':[' + ','.join([key+':'+str(value) for key,value in self._twitter_stats.items()]))
-
-        for stat in self._twitter_stats.key():
-            self._twitter_stats[stat] = 0
+#    def printStats(self):
+#        dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+#        print(dt + ':[' + ','.join([key+':'+str(value) for key,value in self._twitter_stats.items()]))
+#
+#        for stat in self._twitter_stats.key():
+#            self._twitter_stats[stat] = 0
+#      
+#track = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+#conns = -(-len(track)/5)
+#for a in range(1,conns):
+#  new = track[:5]
+#  track = track[5:]
+#  print(new)

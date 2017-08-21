@@ -1,8 +1,6 @@
-config.ini
-*.pyc
-*.old
+tweet_collector/config.ini
+tweet_collector/*.pyc
 *.log
 metastore_db
-librdkafka
 .idea
 .ipynb_checkpoints
