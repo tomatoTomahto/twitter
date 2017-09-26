@@ -14,11 +14,13 @@ config.read('tweet_collector/config.ini')
 twitter_con = twitter.TwitterConnection(config)
 
 while True:
-    print('Listening for tweets...')
-    twitter_con.track()
-
-    # Keep connection open for 5 minutes
-    time.sleep(600)
-
-    # Write all tweets to disk
-#    twitter_con.printStats()
+  try:
+    twitter_con.search()
+  except Exception as e:
+    print(str(e))
+  
+#    print('Listening for tweets...')
+#    twitter_con.track()
+#
+#    # Keep connection open for 5 minutes
+#    time.sleep(600)

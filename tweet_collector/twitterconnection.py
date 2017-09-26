@@ -74,40 +74,70 @@ class TwitterConnection():
         # Initialize twitter statistics
         self._twitter_stats = {'tweets':0}
         
+        self._max_tweet_id = {}
+        
         self._twitter_streams = []
 
     # connect (PRIVATE) - connect to twitter via tweepy API using credentials
     def _connect(self):
-        self._api = tweepy.API(self._auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+        self._api = tweepy.API(self._auth, wait_on_rate_limit=True, 
+                               wait_on_rate_limit_notify=True,
+                               parser=tweepy.parsers.ModelParser())
         print('Connected to Twitter')
 
     # track - create a twitter listening to track a given set of search terms
     def track(self):
         track_terms = self._track_terms
-        connections = -(-len(track_terms)/400)
-        for connection in range(self._start_index,self._start_index+2):
-          print('Connection %d' % (connection+1))
-          terms = track_terms[:400]
+        connections = -(-len(track_terms)/300)
+        for connection in range(self._start_index,self._start_index+1):
+          terms = track_terms[:300]
           twitter_stream = tweepy.Stream(self._auth, self.MyListener(writer=self._writer))
           twitter_stream.filter(track=terms, async=True)
           self._twitter_streams.append(twitter_stream)
-          track_terms = track_terms[400:]
+          track_terms = track_terms[300:]
+    
+    def search(self):
+      def limit_handled(cursor):
+        while True:
+          try:
+            yield cursor.next()
+          except tweepy.RateLimitError:
+            print('Rate limit met, sleeping for 15 minutes')
+            time.sleep(15 * 60)
+          #except Exception as e:
+          #  print('Error: ' + str(e))
+            
+      
+      search_terms = self._track_terms
+      searches = -(-len(search_terms)/10)
+      print(searches)
+      for search in range(self._start_index, self._start_index+205):
+        if search not in self._max_tweet_id.keys():
+          self._max_tweet_id[search] = 0
+          
+        print('Max Tweet ID: %d' % self._max_tweet_id[search])
+        #print(len(search_terms[search*10:search*10+10]))
+        query = ' OR '.join(search_terms[search*10:search*10+10])
+        print(query)
+        pageCnt = 0
+        for page in limit_handled(tweepy.Cursor(self._api.search,
+                                                q=query,
+                                                count=100,
+                                                since_id=self._max_tweet_id[search],
+                                                result_type="recent",
+                                                include_entities=True,
+                                                lang="en").pages()):
+          pageCnt += 1
+          statusCnt = len(page)
+          print('%d Statuses on Page %d for Search [%s]' % (statusCnt, pageCnt, query))
+          for status in page:
+            tweet_id = int(status._json['id'])
+            #print(tweet_id)
+            if tweet_id > self._max_tweet_id[search]:
+              self._max_tweet_id[search] = tweet_id
+            self._writer.write(json.dumps(status._json))
 
     # disconnect - disconnect twitter stream
     def _disconnect(self):
         for twitter_stream in self._twitter_streams:
           twitter_stream.disconnect()
-
-#    def printStats(self):
-#        dt = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-#        print(dt + ':[' + ','.join([key+':'+str(value) for key,value in self._twitter_stats.items()]))
-#
-#        for stat in self._twitter_stats.key():
-#            self._twitter_stats[stat] = 0
-#      
-#track = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-#conns = -(-len(track)/5)
-#for a in range(1,conns):
-#  new = track[:5]
-#  track = track[5:]
-#  print(new)
