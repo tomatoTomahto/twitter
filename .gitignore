@@ -1,5 +1,6 @@
 tweet_collector/config.ini
 tweet_collector/*.pyc
+tweet_collector/*.json
 *.log
 metastore_db
 .idea
