@@ -5,3 +5,7 @@ tweet_collector/*.json
 metastore_db
 .idea
 .ipynb_checkpoints
+.ipython
+.local
+.viminfo
+.bash_history
