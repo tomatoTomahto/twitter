@@ -8,4 +8,7 @@ metastore_db
 .ipython
 .local
 .viminfo
+.cache/
+.oracle_jre_usage/
+.pip/
 .bash_history
