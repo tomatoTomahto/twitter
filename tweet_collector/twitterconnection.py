@@ -41,30 +41,35 @@ class TwitterConnection():
             return True
 
     def __init__(self, config):
-        for configEntry in ['twitter','track','output']:
-          if configEntry not in config:
-            raise Exception('Error: missing %s config' % configEntry)
+#        for configEntry in ['twitter','track','output']:
+#          if configEntry not in config:
+#            raise Exception('Error: missing %s config' % configEntry)
 
         # Twitter credentials
-        self._access_token = config['twitter']['access_token']
-        self._access_token_secret = config['twitter']['access_token_secret']
-        self._consumer_key = config['twitter']['consumer_key']
-        self._consumer_secret = config['twitter']['consumer_secret']
+#        self._access_token = config['twitter']['access_token']
+#        self._access_token_secret = config['twitter']['access_token_secret']
+#        self._consumer_key = config['twitter']['consumer_key']
+#        self._consumer_secret = config['twitter']['consumer_secret']
+
+        self._access_token = config.get('twitter','access_token')
+        self._access_token_secret = config.get('twitter','access_token_secret')
+        self._consumer_key = config.get('twitter','consumer_key')
+        self._consumer_secret = config.get('twitter','consumer_secret')
 
         # Retrieve terms to track
-        track_file = open(config['track']['file'], 'r')
+        track_file = open(config.get('track','file'), 'r')
         self._track_terms = [line.rstrip('\n') for line in track_file]
-        self._start_index = int(config['track']['start'])
+        self._start_index = int(config.get('track','start'))
 
         # Store tweets temporarily and dump them to file at an interval
         self._tweets_to_insert = []
 
         # Initialize Kafka or File Writer
-        if config['output']['type'] == 'kafka':
-          self._writer = kafka.KafkaConnection(brokers=config['output']['kafka_brokers'],
-                                              topic=config['output']['kafka_topic'])
+        if config.get('output','type') == 'kafka':
+          self._writer = kafka.KafkaConnection(brokers=config.get('output','kafka_brokers'),
+                                              topic=config.get('output','kafka_topic'))
         else:
-          self._writer = filewriter.FileWriter(filename=config['output']['filename'])
+          self._writer = filewriter.FileWriter(filename=config.get('output','filename'))
 
         #This handles Twitter authetification and the connection to Twitter
         self._auth = tweepy.OAuthHandler(self._consumer_key, self._consumer_secret)

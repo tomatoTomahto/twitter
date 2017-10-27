@@ -1,13 +1,14 @@
 # Install any required libraries
 #!pip install tweepy
 #!pip install kafka
+#!pip install configparser
 
-import time, datetime, configparser, os, sys
+import time, datetime, ConfigParser, os, sys
 sys.path.append('tweet_collector')
 import twitterconnection as twitter
 
 # Read config file that contains database and twitter connection info
-config = configparser.ConfigParser()
+config = ConfigParser.ConfigParser()
 config.read('tweet_collector/config.ini')
 
 # Connect to twitter and track stocks
