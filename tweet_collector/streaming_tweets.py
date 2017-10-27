@@ -1,7 +1,6 @@
 # Install any required libraries
-#!pip install tweepy
-#!pip install kafka
-#!pip install configparser
+!pip install tweepy
+!pip install kafka
 
 import time, datetime, ConfigParser, os, sys
 sys.path.append('tweet_collector')
@@ -16,12 +15,11 @@ twitter_con = twitter.TwitterConnection(config)
 
 while True:
   try:
-    twitter_con.search()
+    print('Listening for tweets...')
+    twitter_con.track()
+
   except Exception as e:
     print(str(e))
-  
-#    print('Listening for tweets...')
-#    twitter_con.track()
-#
-#    # Keep connection open for 5 minutes
-#    time.sleep(600)
+    
+  # Keep connection open for 5 minutes
+  time.sleep(600)

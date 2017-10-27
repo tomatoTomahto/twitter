@@ -1,4 +1,5 @@
 from kafka import KafkaProducer
+import json
 
 class KafkaConnection():
     def __init__(self, brokers, topic):
