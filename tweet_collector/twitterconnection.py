@@ -59,7 +59,8 @@ class TwitterConnection():
           self._writer = kafka.KafkaConnection(brokers=config.get('output','kafka_brokers'),
                                               topic=config.get('output','kafka_topic'))
         else:
-          self._writer = filewriter.FileWriter(filename=config.get('output','filename'))
+          data_dir = 'data/'+datetime.datetime.now().strftime('%Y-%m-%d')+'-'
+          self._writer = filewriter.FileWriter(filename=data_dir+config.get('output','filename'))
 
         #This handles Twitter authetification and the connection to Twitter
         self._auth = tweepy.OAuthHandler(self._consumer_key, self._consumer_secret)
