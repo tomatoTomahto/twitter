@@ -1,0 +1,45 @@
+CREATE DATABASE twitter;
+USE twitter;
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+    id BIGINT,
+    name STRING,
+    screen_name STRING,
+    `location` STRING,
+    description STRING,
+    url STRING,
+    followers INT,
+    friends INT,
+    created_at BIGINT,
+    statuses INT,
+    lang STRING,
+    PRIMARY KEY (id)
+) PARTITION BY HASH PARTITIONS 16
+STORED AS KUDU;
+
+DROP TABLE IF EXISTS tweets;
+CREATE TABLE tweets (
+    id BIGINT,
+    created_at BIGINT,
+    geo STRING,
+    coordinates STRING,
+    retweet_count INT,
+    favorite_count INT,
+    favorited BOOLEAN,
+    retweeted BOOLEAN,
+    lang STRING,
+    user_id BIGINT,
+    PRIMARY  KEY (id)
+) PARTITION BY HASH PARTITIONS 16
+STORED AS KUDU;
+
+DROP TABLE IF EXISTS tweet_entities;
+CREATE TABLE tweet_entities (
+    id BIGINT,
+    created_at BIGINT,
+    type STRING,
+    entity STRING,
+    PRIMARY KEY (id, created_at, type, entity)
+) PARTITION BY HASH PARTITIONS 16
+STORED AS KUDU;
